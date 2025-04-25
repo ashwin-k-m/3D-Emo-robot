@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3D Cube with Face Image</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/RoundedBoxGeometry.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="canvas-container"></div>
+
+    <script>
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf0f0f0);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 5;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(1, 1, 1);
+        scene.add(directionalLight);
+
+        // Load face texture
+        const faceTexture = new THREE.TextureLoader().load('images/ro.jpg'); // Replace with your image
+
+        // Materials
+        const grayMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3, metalness: 0.1 });
+        const faceMaterial = new THREE.MeshStandardMaterial({ map: faceTexture, roughness: 0.1, metalness: 0.1 });
+
+        const materials = [
+            grayMaterial, // right
+            grayMaterial, // left
+            grayMaterial, // top
+            grayMaterial, // bottom
+            faceMaterial, // front
+            grayMaterial  // back
+        ];
+
+        // Create rounded cube
+        const geometry = new THREE.RoundedBoxGeometry(1.5, 1.5, 1.5, 5, 0.2); // width, height, depth, segments, radius
+        const cube = new THREE.Mesh(geometry, materials);
+        scene.add(cube);
+
+        // Mouse interaction
+        let mouseX = 0, mouseY = 0;
+        const maxRotation = Math.PI / 4;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(event.clientY / window.innerHeight) * -2 - 1;
+        });
+
+        // Create torso (oval-shaped and small)
+        const torsoGeometry = new THREE.SphereGeometry(0.5, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2); // top half only
+        torsoGeometry.scale(1, 0.6, 1.2); // Making it oval (adjust the Y and Z scale)
+
+        const torsoMaterial = new THREE.MeshStandardMaterial({
+            color: 0xFFFFFF, // white color
+            roughness: 0.4,
+            metalness: 0.3
+        });
+
+        const torso = new THREE.Mesh(torsoGeometry, torsoMaterial);
+        torso.position.y = -1.4; // Position torso in the center
+        scene.add(torso);
+
+        // Create arms (oval-shaped and slightly stretched)
+        const armGeometry = new THREE.SphereGeometry(0.2, 32, 32); // Small sphere for arms
+        armGeometry.scale(0.8, 0.5, 1.8); // Stretch arms to make them slightly longer
+
+        const armMaterial = new THREE.MeshStandardMaterial({
+            color: 0xFFFFFF, // white color
+            roughness: 0.4,
+            metalness: 0.3
+        });
+
+        // Left arm
+        const leftArm = new THREE.Mesh(armGeometry, armMaterial);
+        leftArm.position.x = -0.7; // Position left arm on the left side
+        leftArm.position.y = -1.4; // Slightly above torso
+        scene.add(leftArm);
+
+        // Right arm
+        const rightArm = new THREE.Mesh(armGeometry, armMaterial);
+        rightArm.position.x = 0.7; // Position right arm on the right side
+        rightArm.position.y = -1.4; // Slightly above torso
+        scene.add(rightArm);
+
+        // Optional: Add a small connecting geometry for better hand detail if needed
+
+        // Example: You can create a small oval for hands by creating a small sphere geometry and adjusting it further
+
+
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            cube.rotation.y = mouseX * maxRotation;
+            cube.rotation.x = mouseY * maxRotation;
+
+            if (Math.abs(mouseX) < 0.1 && Math.abs(mouseY) < 0.1) {
+                cube.rotation.y += 0.002;
+                cube.rotation.x += 0.001;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Responsive
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>
