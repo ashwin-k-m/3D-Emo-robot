@@ -71,6 +71,29 @@
             mouseY = -(event.clientY / window.innerHeight) * -2 - 1;
         });
 
+        // Touch support
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        document.addEventListener('touchstart', (event) => {
+            if (event.touches.length === 1) {
+                touchStartX = event.touches[0].clientX;
+                touchStartY = event.touches[0].clientY;
+            }
+        });
+
+        document.addEventListener('touchmove', (event) => {
+            if (event.touches.length === 1) {
+                const touchX = event.touches[0].clientX;
+                const touchY = event.touches[0].clientY;
+
+                // Normalize to [-1, 1] range like mouse
+                mouseX = (touchX / window.innerWidth) * 2 - 1;
+                mouseY = -(touchY / window.innerHeight) * -2 - 1;
+            }
+        });
+
+
         // Create torso (oval-shaped and small)
         const torsoGeometry = new THREE.SphereGeometry(0.5, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2); // top half only
         torsoGeometry.scale(1, 0.6, 1.2); // Making it oval (adjust the Y and Z scale)
